@@ -1,0 +1,94 @@
+name: Collect market data
+
+on:
+  schedule:
+    # Two attempts on the same UTC day. 22:20 UTC is after every US and EU
+    # close in both DST regimes; 01:20 UTC the next morning is the safety net
+    # for a dropped or delayed first run (GitHub cron is best-effort and can
+    # slip by hours). The second attempt skips itself when the first one
+    # already produced fresh data — see the "Decide whether to collect" step.
+    - cron: "20 22 * * 1-5"
+    - cron: "20 1 * * 2-6"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+# keepalive guard: GitHub disables *scheduled* workflows in repositories with
+# no activity for 60 days. The daily data commit this job makes is repository
+# activity, so the schedule keeps itself alive as long as collection works.
+# If collection breaks for two months the schedule dies too — re-enable it in
+# Actions -> Collect market data -> Enable workflow. This is also why the
+# commit step below runs with `if: always()`: a failing run still commits its
+# meta.json heartbeat, which counts as activity and tells the dashboard why.
+concurrency:
+  group: collect
+  cancel-in-progress: false
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      # Idempotence: skip a duplicate scheduled attempt when data/meta.json
+      # already carries a run from this UTC date whose US data was fully
+      # fresh (lag_sessions == 0). A manual run never skips.
+      - name: Decide whether to collect
+        id: gate
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+        run: python .github/scripts/should_collect.py
+
+      - name: Run collector
+        id: collect
+        if: steps.gate.outputs.skip != 'true'
+        run: python collector.py
+
+      # Runs even when the collector failed, so the meta.json heartbeat (and
+      # any files that were written) reach the dashboard.
+      - name: Commit and push data
+        if: always() && steps.gate.outputs.skip != 'true'
+        env:
+          BRANCH: ${{ github.ref_name }}
+        run: |
+          set -uo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A data/
+          if git diff --cached --quiet; then
+            echo "No data changes to commit."
+            exit 0
+          fi
+          git commit -m "data: $(date -u +'%Y-%m-%d %H:%M UTC')"
+          git pull --rebase --autostash origin "$BRANCH" || echo "pre-push rebase failed; trying push anyway"
+          for attempt in 1 2 3; do
+            if git push origin "HEAD:$BRANCH"; then
+              echo "pushed on attempt $attempt"
+              exit 0
+            fi
+            echo "push attempt $attempt failed; re-syncing with origin/$BRANCH"
+            git fetch origin "$BRANCH" || true
+            git pull --rebase --autostash origin "$BRANCH" || true
+            sleep $((attempt * 10))
+          done
+          echo "could not push after 3 attempts"
+          exit 1
+
+      - name: Fail the run if the collector failed
+        if: always() && steps.collect.outcome == 'failure'
+        run: |
+          echo "collector.py exited non-zero — see the 'Run collector' step log."
+          echo "data/meta.json was still committed so the dashboard can show the failure."
+          exit 1
