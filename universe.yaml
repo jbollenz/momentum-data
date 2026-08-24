@@ -1,0 +1,220 @@
+# universe.yaml -- single source of truth for the ticker universe.
+#
+# collector.py reads this file on every run. Edit it (add/remove entries),
+# commit, and the next run picks up the change. All tickers use Yahoo
+# Finance notation (exchange suffixes like .DE/.PA/.AS, ^ for indices,
+# =X for FX).
+#
+# `verify: true` marks entries whose sector/name mapping has NOT been
+# hand-checked against the issuer's site. The data itself is still
+# collected; the flag only means "double-check the label before trusting
+# it in the dashboard UI".
+
+etfs_us:
+  # --- benchmarks -------------------------------------------------------
+  - {ticker: SPY,  name: "S&P 500",              group: benchmark}
+  - {ticker: RSP,  name: "S&P 500 Equal Weight", group: benchmark}
+  - {ticker: QQQ,  name: "Nasdaq 100",           group: benchmark}
+  - {ticker: IWM,  name: "Russell 2000",         group: benchmark}
+  # --- factor proxies (red-team round 2, ADD #4) ------------------------
+  - {ticker: IWF,  name: "Russell 1000 Growth",  group: factor, subgroup: growth}
+  - {ticker: IWD,  name: "Russell 1000 Value",   group: factor, subgroup: value}
+  - {ticker: QUAL, name: "MSCI USA Quality",     group: factor, subgroup: quality}
+  - {ticker: USMV, name: "MSCI USA Min Vol",     group: factor, subgroup: low-volatility}
+  - {ticker: MTUM, name: "MSCI USA Momentum",    group: factor, subgroup: momentum}
+  - {ticker: SPHB, name: "S&P 500 High Beta",    group: factor, subgroup: high-beta}
+  # --- 11 GICS sector SPDRs --------------------------------------------
+  - {ticker: XLK,  name: "Technology",             group: sector, subgroup: technology}
+  - {ticker: XLF,  name: "Financials",             group: sector, subgroup: financials}
+  - {ticker: XLV,  name: "Health Care",            group: sector, subgroup: health-care}
+  - {ticker: XLE,  name: "Energy",                 group: sector, subgroup: energy}
+  - {ticker: XLI,  name: "Industrials",            group: sector, subgroup: industrials}
+  - {ticker: XLY,  name: "Consumer Discretionary", group: sector, subgroup: consumer-discretionary}
+  - {ticker: XLP,  name: "Consumer Staples",       group: sector, subgroup: consumer-staples}
+  - {ticker: XLU,  name: "Utilities",              group: sector, subgroup: utilities}
+  - {ticker: XLB,  name: "Materials",              group: sector, subgroup: materials}
+  - {ticker: XLRE, name: "Real Estate",            group: sector, subgroup: real-estate}
+  - {ticker: XLC,  name: "Communication Services", group: sector, subgroup: communication-services}
+  # --- themes -----------------------------------------------------------
+  - {ticker: SMH,  name: "Semiconductors",           group: theme, subgroup: semis}
+  - {ticker: IGV,  name: "Software",                 group: theme, subgroup: software}
+  - {ticker: CIBR, name: "Cybersecurity",            group: theme, subgroup: cybersecurity}
+  - {ticker: SKYY, name: "Cloud Computing",          group: theme, subgroup: cloud}
+  - {ticker: AIQ,  name: "Artificial Intelligence",  group: theme, subgroup: ai}
+  - {ticker: FDN,  name: "Internet",                 group: theme, subgroup: internet}
+  - {ticker: XBI,  name: "Biotech",                  group: theme, subgroup: biotech}
+  - {ticker: IHI,  name: "Medical Devices",          group: theme, subgroup: medical-devices}
+  - {ticker: KRE,  name: "Regional Banks",           group: theme, subgroup: regional-banks}
+  - {ticker: IAI,  name: "Capital Markets",          group: theme, subgroup: capital-markets}
+  - {ticker: KIE,  name: "Insurance",                group: theme, subgroup: insurance}
+  - {ticker: XOP,  name: "Oil & Gas E&P",            group: theme, subgroup: oil-gas-ep}
+  - {ticker: OIH,  name: "Oil Services",             group: theme, subgroup: oil-services}
+  - {ticker: URA,  name: "Uranium",                  group: theme, subgroup: uranium}
+  - {ticker: TAN,  name: "Solar",                    group: theme, subgroup: solar}
+  - {ticker: PAVE, name: "US Infrastructure",        group: theme, subgroup: infrastructure}
+  - {ticker: ITA,  name: "Aerospace & Defense",      group: theme, subgroup: defense}
+  - {ticker: JETS, name: "Airlines",                 group: theme, subgroup: airlines}
+  - {ticker: IYT,  name: "Transports",               group: theme, subgroup: transports}
+  - {ticker: XHB,  name: "Homebuilders",             group: theme, subgroup: homebuilders}
+  - {ticker: XRT,  name: "Retail",                   group: theme, subgroup: retail}
+  - {ticker: XME,  name: "Metals & Mining",          group: theme, subgroup: metals-mining}
+  - {ticker: GDX,  name: "Gold Miners",              group: theme, subgroup: gold-miners}
+  - {ticker: LIT,  name: "Lithium & Battery Tech",   group: theme, subgroup: battery-lithium}
+  - {ticker: ARKK, name: "ARK Innovation",           group: theme, subgroup: spec-growth}
+  - {ticker: MAGS, name: "Magnificent Seven",        group: theme, subgroup: mega-cap-7}
+  - {ticker: BOTZ, name: "Robotics & AI",            group: theme, subgroup: robotics}
+  # --- macro ------------------------------------------------------------
+  - {ticker: GLD,  name: "Gold",                 group: macro, subgroup: gold}
+  - {ticker: CPER, name: "Copper",               group: macro, subgroup: copper}
+  - {ticker: USO,  name: "WTI Crude Oil",        group: macro, subgroup: oil}
+  - {ticker: TLT,  name: "20+ Year Treasuries",  group: macro, subgroup: long-treasuries}
+  - {ticker: HYG,  name: "High Yield Credit",    group: macro, subgroup: high-yield}
+  - {ticker: IEF,  name: "7-10 Year Treasuries", group: macro, subgroup: 7-10y-treasuries}
+  - {ticker: UUP,  name: "US Dollar",            group: macro, subgroup: dollar}
+  - {ticker: IBIT, name: "Bitcoin",              group: macro, subgroup: bitcoin}
+
+# iShares STOXX Europe 600 sector ETFs on Xetra (plus two benchmarks).
+# The whole list is validated at runtime: the collector downloads whatever
+# is listed and records anything that returns no data in meta.json.
+# Entries with `verify: true` have a best-effort sector mapping that has
+# not been confirmed against ishares.com -- check the label before relying
+# on it (the EXV*/EXH*/EXI* code-to-sector scheme is easy to mix up).
+etfs_eu:
+  - {ticker: EXSA.DE, name: "STOXX Europe 600",       group: benchmark}
+  - {ticker: EXS1.DE, name: "DAX",                    group: benchmark}
+  - {ticker: EXV1.DE, name: "Europe Banks",           group: sector, subgroup: banks}
+  - {ticker: EXV3.DE, name: "Europe Technology",      group: sector, subgroup: technology}
+  - {ticker: EXV4.DE, name: "Europe Health Care",     group: sector, subgroup: health-care}
+  - {ticker: EXV6.DE, name: "Europe Basic Resources", group: sector, subgroup: basic-resources}
+  - {ticker: EXV2.DE, name: "Europe Telecommunications",     group: sector, subgroup: telecommunications, verify: true}
+  - {ticker: EXV5.DE, name: "Europe Automobiles & Parts",    group: sector, subgroup: automobiles-parts, verify: true}
+  - {ticker: EXV7.DE, name: "Europe Chemicals",              group: sector, subgroup: chemicals, verify: true}
+  - {ticker: EXV8.DE, name: "Europe Construction & Materials", group: sector, subgroup: construction-materials, verify: true}
+  - {ticker: EXV9.DE, name: "Europe Travel & Leisure",       group: sector, subgroup: travel-leisure, verify: true}
+  - {ticker: EXH1.DE, name: "Europe Energy",                 group: sector, subgroup: energy, verify: true}
+  - {ticker: EXH2.DE, name: "Europe Financial Services",     group: sector, subgroup: financial-services, verify: true}
+  - {ticker: EXH3.DE, name: "Europe Food & Beverage",        group: sector, subgroup: food-beverage, verify: true}
+  - {ticker: EXH4.DE, name: "Europe Industrial Goods & Services", group: sector, subgroup: industrials, verify: true}
+  - {ticker: EXH5.DE, name: "Europe Insurance",              group: sector, subgroup: insurance, verify: true}
+  - {ticker: EXH6.DE, name: "Europe Media",                  group: sector, subgroup: media, verify: true}
+  - {ticker: EXH7.DE, name: "Europe Personal & Household Goods", group: sector, subgroup: personal-household-goods, verify: true}
+  - {ticker: EXH8.DE, name: "Europe Retail",                 group: sector, subgroup: retail, verify: true}
+  - {ticker: EXH9.DE, name: "Europe Utilities",              group: sector, subgroup: utilities, verify: true}
+  - {ticker: EXI5.DE, name: "Europe Real Estate",            group: sector, subgroup: real-estate, verify: true}
+
+indices_eu: ["^STOXX", "^STOXX50E", "^GDAXI", "^FCHI", "^AEX", "^BFX", "^IBEX", "FTSEMIB.MI"]
+
+fx: ["EURUSD=X"]
+
+vol: ["^VIX", "^VIX3M"]
+
+# ~90 liquid EU large caps: EURO STOXX 50 members (best-effort membership,
+# it drifts a little every review) plus additional liquid euro-area and
+# Nordic names. No UK or Switzerland in v1. Nordic names trade in DKK/SEK/
+# NOK -- the country tag tells the dashboard which; prices come through in
+# the local trading currency.
+stocks_eu:
+  # --- EURO STOXX 50 (best-effort membership) ---------------------------
+  - {ticker: ABI.BR,    name: "Anheuser-Busch InBev", country: BE}
+  - {ticker: AD.AS,     name: "Ahold Delhaize",       country: NL}
+  - {ticker: ADS.DE,    name: "Adidas",               country: DE}
+  - {ticker: ADYEN.AS,  name: "Adyen",                country: NL}
+  - {ticker: AI.PA,     name: "Air Liquide",          country: FR}
+  - {ticker: AIR.PA,    name: "Airbus",               country: FR}
+  - {ticker: ALV.DE,    name: "Allianz",              country: DE}
+  - {ticker: ASML.AS,   name: "ASML",                 country: NL}
+  - {ticker: BAS.DE,    name: "BASF",                 country: DE}
+  - {ticker: BAYN.DE,   name: "Bayer",                country: DE}
+  - {ticker: BBVA.MC,   name: "BBVA",                 country: ES}
+  - {ticker: BMW.DE,    name: "BMW",                  country: DE}
+  - {ticker: BN.PA,     name: "Danone",               country: FR}
+  - {ticker: BNP.PA,    name: "BNP Paribas",          country: FR}
+  - {ticker: CS.PA,     name: "AXA",                  country: FR}
+  - {ticker: DB1.DE,    name: "Deutsche Boerse",      country: DE}
+  - {ticker: DG.PA,     name: "Vinci",                country: FR}
+  - {ticker: DHL.DE,    name: "DHL Group",            country: DE}
+  - {ticker: DTE.DE,    name: "Deutsche Telekom",     country: DE}
+  - {ticker: EL.PA,     name: "EssilorLuxottica",     country: FR}
+  - {ticker: ENEL.MI,   name: "Enel",                 country: IT}
+  - {ticker: ENI.MI,    name: "Eni",                  country: IT}
+  - {ticker: ENR.DE,    name: "Siemens Energy",       country: DE}
+  - {ticker: IBE.MC,    name: "Iberdrola",            country: ES}
+  - {ticker: IFX.DE,    name: "Infineon",             country: DE}
+  - {ticker: INGA.AS,   name: "ING Groep",            country: NL}
+  - {ticker: ISP.MI,    name: "Intesa Sanpaolo",      country: IT}
+  - {ticker: ITX.MC,    name: "Inditex",              country: ES}
+  - {ticker: KER.PA,    name: "Kering",               country: FR}
+  - {ticker: MBG.DE,    name: "Mercedes-Benz Group",  country: DE}
+  - {ticker: MC.PA,     name: "LVMH",                 country: FR}
+  - {ticker: MUV2.DE,   name: "Munich Re",            country: DE}
+  - {ticker: NDA-FI.HE, name: "Nordea Bank",          country: FI}
+  - {ticker: NOKIA.HE,  name: "Nokia",                country: FI}
+  - {ticker: OR.PA,     name: "L'Oreal",              country: FR}
+  - {ticker: PRX.AS,    name: "Prosus",               country: NL}
+  - {ticker: RACE.MI,   name: "Ferrari",              country: IT}
+  - {ticker: RHM.DE,    name: "Rheinmetall",          country: DE}
+  - {ticker: RI.PA,     name: "Pernod Ricard",        country: FR}
+  - {ticker: RMS.PA,    name: "Hermes",               country: FR}
+  - {ticker: SAF.PA,    name: "Safran",               country: FR}
+  - {ticker: SAN.MC,    name: "Banco Santander",      country: ES}
+  - {ticker: SAN.PA,    name: "Sanofi",               country: FR}
+  - {ticker: SAP.DE,    name: "SAP",                  country: DE}
+  - {ticker: SGO.PA,    name: "Saint-Gobain",         country: FR}
+  - {ticker: SIE.DE,    name: "Siemens",              country: DE}
+  - {ticker: STLAM.MI,  name: "Stellantis",           country: IT}
+  - {ticker: SU.PA,     name: "Schneider Electric",   country: FR}
+  - {ticker: TTE.PA,    name: "TotalEnergies",        country: FR}
+  - {ticker: UCG.MI,    name: "UniCredit",            country: IT}
+  - {ticker: VNA.DE,    name: "Vonovia",              country: DE}
+  - {ticker: VOW3.DE,   name: "Volkswagen",           country: DE}
+  - {ticker: WKL.AS,    name: "Wolters Kluwer",       country: NL}
+  # --- additional liquid euro-area names --------------------------------
+  - {ticker: DBK.DE,    name: "Deutsche Bank",        country: DE}
+  - {ticker: SHL.DE,    name: "Siemens Healthineers", country: DE}
+  - {ticker: RWE.DE,    name: "RWE",                  country: DE}
+  - {ticker: EOAN.DE,   name: "E.ON",                 country: DE}
+  - {ticker: MTX.DE,    name: "MTU Aero Engines",     country: DE}
+  - {ticker: CAP.PA,    name: "Capgemini",            country: FR}
+  - {ticker: DSY.PA,    name: "Dassault Systemes",    country: FR}
+  - {ticker: HO.PA,     name: "Thales",               country: FR}
+  - {ticker: GLE.PA,    name: "Societe Generale",     country: FR}
+  - {ticker: STMPA.PA,  name: "STMicroelectronics",   country: FR}
+  - {ticker: ASM.AS,    name: "ASM International",    country: NL}
+  - {ticker: BESI.AS,   name: "BE Semiconductor",     country: NL}
+  - {ticker: HEIA.AS,   name: "Heineken",             country: NL}
+  - {ticker: PHIA.AS,   name: "Philips",              country: NL}
+  - {ticker: TEF.MC,    name: "Telefonica",           country: ES}
+  - {ticker: CABK.MC,   name: "CaixaBank",            country: ES}
+  - {ticker: AMS.MC,    name: "Amadeus IT",           country: ES}
+  - {ticker: G.MI,      name: "Generali",             country: IT}
+  - {ticker: LDO.MI,    name: "Leonardo",             country: IT}
+  - {ticker: PRY.MI,    name: "Prysmian",             country: IT}
+  - {ticker: KBC.BR,    name: "KBC Group",            country: BE}
+  - {ticker: ARGX.BR,   name: "argenx",               country: BE}
+  - {ticker: SAMPO.HE,  name: "Sampo",                country: FI}
+  - {ticker: UPM.HE,    name: "UPM-Kymmene",          country: FI}
+  - {ticker: KNEBV.HE,  name: "KONE",                 country: FI}
+  - {ticker: EDP.LS,    name: "EDP",                  country: PT}
+  # --- Nordics (DKK / SEK / NOK denominated) ----------------------------
+  - {ticker: NOVO-B.CO, name: "Novo Nordisk",         country: DK}
+  - {ticker: VWS.CO,    name: "Vestas Wind Systems",  country: DK}
+  - {ticker: DSV.CO,    name: "DSV",                  country: DK}
+  - {ticker: ERIC-B.ST, name: "Ericsson",             country: SE}
+  - {ticker: VOLV-B.ST, name: "Volvo",                country: SE}
+  - {ticker: ATCO-A.ST, name: "Atlas Copco",          country: SE}
+  - {ticker: INVE-B.ST, name: "Investor",             country: SE}
+  - {ticker: SAND.ST,   name: "Sandvik",              country: SE}
+  - {ticker: EQNR.OL,   name: "Equinor",              country: "NO"}
+  - {ticker: DNB.OL,    name: "DNB Bank",             country: "NO"}
+
+# Sentinel: the collector resolves this to the current S&P 500 member list
+# from the `datasets/s-and-p-500-companies` GitHub dataset. On download
+# failure it falls back to the cached copy in data/sp500_constituents.csv.
+stocks_us: "auto:sp500"
+
+# FRED series pulled as 8 years of daily/weekly history (percentile
+# baselines need the depth). VIXCLS = VIX close, BAMLH0A0HYM2 = US high-yield
+# OAS, T10Y2Y = 10y-2y spread, DGS10/DGS2 = 10y/2y Treasury constant maturity,
+# DTWEXBGS = broad trade-weighted dollar, BAMLC0A0CM = US investment-grade OAS,
+# NFCI = Chicago Fed National Financial Conditions Index (weekly).
+fred_series: [VIXCLS, BAMLH0A0HYM2, T10Y2Y, DGS10, DGS2, DTWEXBGS, BAMLC0A0CM, NFCI]
